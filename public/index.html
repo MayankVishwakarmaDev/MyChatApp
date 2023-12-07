@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Chat App</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div class="chatbot">
+        <div class="chatbot__header">
+            <p> <span class="u-text-highlight">Chat with your friends with </span><strong> My Chat App </strong> <span
+                    class="u-text-highlight">.</span></p>
+
+            <svg class="chatbot__close-button icon-leave" id="leave" viewBox="0 0 32 32">
+                <use xlink:href="#icon-leave" />
+            </svg>
+        </div>
+        <div class="chatbot__message-window">
+            <ul class="chatbot__messages">
+
+                <!-- Answer and response added here -->
+            </ul>
+        </div>
+        <div class="chatbot__entry chatbot--closed">
+            <input type="text" class="chatbot__input" placeholder="Write a message..." />
+            <svg class="chatbot__submit" viewBox="0 0 32 32">
+                <use xlink:href="#icon-send" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-container" id="modal_container">
+        <div class="modal">
+            <h3>Join Chat with your Friends.</h3>
+            <form id="modal-form">
+                <label for="name">Username : </label>
+                <input type="text" class="form-input" id="name" name="name" placeholder="Enter Your Name..." required>
+
+                <label for="code">Connection Code :</label>
+                <input type="text" class="form-input" id="code" name="code" placeholder="Enter Connection code..." required>
+
+                <input type="submit" class="form-btn" value="Submit">
+            </form>
+        </div>
+    </div>    
+
+    <!-- Symbols -->
+    <svg>
+        <!-- Close icon -->
+        <symbol id="icon-close" viewBox="0 0 32 32">
+            <title>Close</title>
+            <path d="M2.624 8.297l2.963-2.963 23.704 23.704-2.963 2.963-23.704-23.704z" />
+            <path d="M2.624 29.037l23.704-23.704 2.963 2.963-23.704 23.704-2.963-2.963z" />
+        </symbol>
+
+        <!-- Send icon -->
+        <symbol id="icon-send" viewBox="0 0 23.97 21.9">
+            <title>Send</title>
+            <path d="M0.31,9.43a0.5,0.5,0,0,0,0,.93l8.3,3.23L23.15,0Z" />
+            <path d="M9,14.6H9V21.4a0.5,0.5,0,0,0,.93.25L13.22,16l6,3.32A0.5,0.5,0,0,0,20,19l4-18.4Z" />
+        </symbol>
+
+        <!-- Send icon -->
+        <symbol id="icon-leave" viewBox="0 0 23.97 21.9">
+            <title>leave</title>
+            <path
+                d="M6 4C5.44772 4 5 4.44771 5 5L5 19C5 19.5523 5.44772 20 6 20H14C14.5523 20 15 20.4477 15 21C15 21.5523 14.5523 22 14 22H6C4.34315 22 3 20.6569 3 19L3 5C3 3.34314 4.34315 2 6 2L14 2C14.5523 2 15 2.44772 15 3C15 3.55229 14.5523 4 14 4L6 4ZM15.2929 7.29289C15.6834 6.90237 16.3166 6.90237 16.7071 7.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L16.7071 16.7071C16.3166 17.0976 15.6834 17.0976 15.2929 16.7071C14.9024 16.3166 14.9024 15.6834 15.2929 15.2929L17.5858 13H9C8.44772 13 8 12.5523 8 12C8 11.4477 8.44772 11 9 11H17.5858L15.2929 8.70711C14.9024 8.31658 14.9024 7.68342 15.2929 7.29289Z" />
+        </symbol>
+
+    </svg>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/script.js" type="module"></script>
+</body>
+
+</html>
