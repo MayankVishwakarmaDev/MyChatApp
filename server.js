@@ -3,8 +3,8 @@ import http from "http";
 import { Server } from "socket.io";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+
 const app = express();
-let count = 0;
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = new Server(server);
@@ -17,14 +17,17 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+
 io.on("connection", (socket) => {
   console.log("a user connected : " + socket.id);
   socket.on("userMessage", (data) => {
+    console.log("user IP : " + data.ip);
     console.log("userMessage : ", data);
     socket.broadcast.emit("serverMessage", data);
   });
 
   socket.on("joined", (data) => {
+    console.log("user IP : " + data.ip);
     console.log("joined : ", data);
     socket.broadcast.emit("joinedMessage", data);
   });
@@ -35,6 +38,10 @@ io.on("connection", (socket) => {
   socket.on("left", (data) => {
     console.log("left : ", data);
     socket.broadcast.emit("leftMessage", data);
+  });
+  socket.on("typing", (data) => {
+    console.log("typing : ", data);
+    socket.broadcast.emit("typingChat", data);
   });
 });
 

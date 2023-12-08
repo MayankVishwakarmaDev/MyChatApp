@@ -38,7 +38,7 @@
             <h3>Join Chat with your Friends.</h3>
             <form id="modal-form">
                 <label for="name">Username : </label>
-                <input type="text" class="form-input" id="name" name="name" placeholder="Enter Your Name..." required>
+                <input type="text" class="form-input" id="name" name="name" placeholder="Enter Your Name..." required autofocus>
 
                 <label for="code">Connection Code :</label>
                 <input type="text" class="form-input" id="code" name="code" placeholder="Enter Connection code..." required>
@@ -72,6 +72,7 @@
         </symbol>
 
     </svg>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/script.js" type="module"></script>
 </body>

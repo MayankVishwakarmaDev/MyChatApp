@@ -25,8 +25,6 @@ $entry-height: 60px;
   align-items: center;
   justify-content: space-between;
   background-color: $port-gore;
-  // border-top-left-radius: 10px;
-  // border-top-right-radius: 10px;
   height: $header-height;
   padding: 0 $chat-padding;
   width: 100%;
@@ -196,12 +194,12 @@ $entry-height: 60px;
   }
 }
 
-.animation {
-  &:last-child {
-    animation: fadein 0.25s;
-    animation-timing-function: all 200ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
-  }
-}
+// .animation {
+//   // &:last-child {
+//     animation: fadein 0.25s;
+//     animation-timing-function: all 200ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
+//   // }
+// }
 
 .chatbot__arrow {
   width: 0;

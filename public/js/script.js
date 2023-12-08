@@ -1,3 +1,4 @@
+//------------------ document elements ---------------
 const loader = `<span class='loader'><span class='loader__dot'></span><span class='loader__dot'></span><span class='loader__dot'></span></span>`;
 const errorMessage =
   "My apologies, I'm not available at the moment, however, feel free to call our support team directly.";
@@ -11,32 +12,10 @@ const $chatbotHeader = $document.querySelector(".chatbot__header");
 const $chatbotMessages = $document.querySelector(".chatbot__messages");
 const $chatbotInput = $document.querySelector(".chatbot__input");
 const $chatbotSubmit = $document.querySelector(".chatbot__submit");
-const $closeButton = $document.getElementById("leave");
+const $leaveButton = $document.getElementById("leave");
 
 const botLoadingDelay = 0; //1000;
 const botReplyDelay = 0; //2000;
-
-//----------------- socket ----------------------------
-const socket = io();
-
-socket.on("serverMessage", (data) => {
-  if (data.code == sessionStorage.getItem("connectionCode")) {
-    setResponse(data, botLoadingDelay + botReplyDelay);
-  }
-});
-socket.on("joinedMessage", (data) => {
-  if (data.code == sessionStorage.getItem("connectionCode")) {
-    setResponse(data, botLoadingDelay + botReplyDelay);
-  }
-});
-
-socket.on("leftMessage", (data) => {
-  if (data.code == sessionStorage.getItem("connectionCode")) {
-    setResponse(data, botLoadingDelay + botReplyDelay);
-  }
-});
-
-//-----------------------------------------------------
 
 // ------------- Confirm Model ------------------
 
@@ -129,7 +108,8 @@ const aiMessage = (content, isLoading = false, delay = 0) => {
 
 const removeLoader = () => {
   let loadingElem = document.getElementById("is-loading");
-  if (loadingElem) $chatbotMessages.removeChild(loadingElem);
+  if (loadingElem) loadingElem.remove();
+  console.log("called");
 };
 
 const escapeScript = (unsafe) => {
@@ -175,20 +155,25 @@ const scrollDown = () => {
   return false;
 };
 
+const getIpAddress = async () => {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    sessionStorage.setItem("ipAddress", data.ip);
+  } catch (error) {
+    console.error("Error fetching IP address:", error);
+    return null;
+  }
+};
+
 const createResponse = (message) => {
-  fetch("https://api.ipify.org?format=json")
-    .then((res) => {
-      return res.json();
-    })
-    .then((res) => {
-      console.log(sessionStorage.getItem("userName"), res.ip);
-    });
   const currentTime = getCurrentTime();
   return {
     userName: sessionStorage.getItem("userName"),
     message: message,
     code: sessionStorage.getItem("connectionCode"),
     time: currentTime,
+    ip: sessionStorage.getItem("ipAddress"),
   };
 };
 
@@ -228,11 +213,26 @@ const getCurrentTime = () => {
 const send = (text = "") => {
   const sendMessage = createResponse(text);
   socket.emit("userMessage", sendMessage);
-  // aiMessage(loader, true, botLoadingDelay);
+  // aiMessage(loader, true, botLoadingDelay); to run loader
 };
+
+const sendNotification = (title) => {
+  function notification() {
+    Push.create(title, {
+      timeout: 1000,
+    });
+  }
+
+  if (Push.Permission.has()) {
+    notification();
+  } else {
+    Push.Permission.request(notification, () => {});
+  }
+};
+
 const rejoinChat = () => {
   const rejoinedChat = createResponse(
-    `${sessionStorage.getItem("userName")} Rejoined the chat`
+    `${sessionStorage.getItem("userName").toUpperCase()} Rejoined the chat`
   );
   socket.emit("Rejoined", rejoinedChat);
   userMessage(
@@ -243,21 +243,18 @@ const rejoinChat = () => {
 
 const leaveChat = () => {
   const leftContent = createResponse(
-    `${sessionStorage.getItem("userName")} Left the chat`
+    `${sessionStorage.getItem("userName").toUpperCase()} Left the chat`
   );
   socket.emit("left", leftContent);
-  userMessage(
-    createResponse(`You left the Room : ${sessionStorage.getItem('connectionCode')}`),
-    botLoadingDelay + botReplyDelay
-  );
 };
 
 const clearSession = () => {
-  sessionStorage.clear();
+  sessionStorage.removeItem("userName");
+  sessionStorage.removeItem("connectionCode");
   validateUser();
 };
 
-// ------------- Model ------------------
+// ------------- Model --------------------------------
 
 const modalContainerEl = document.getElementById("modal_container");
 const form = document.getElementById("modal-form");
@@ -267,22 +264,66 @@ form.addEventListener("submit", (e) => {
   sessionStorage.setItem("connectionCode", e.target[1].value);
 
   const content = createResponse(
-    `${sessionStorage.getItem("userName")} Joined a chat`
+    `${sessionStorage.getItem("userName").toUpperCase()} Joined the chat`
   );
+
   socket.emit("joined", content);
   userMessage(
-    createResponse(`You Joined Chat with Room code : ${sessionStorage.getItem("connectionCode")} as ${sessionStorage.getItem('userName')}`),
+    createResponse(
+      `You Joined Chat with Room code : ${sessionStorage.getItem(
+        "connectionCode"
+      )} as ${sessionStorage.getItem("userName")}`
+    ),
     botLoadingDelay + botReplyDelay
   );
   modalContainerEl.classList.remove("show");
 });
+//-----------------------------------------------------
+
+//----------------- socket ----------------------------
+const socket = io();
+
+socket.on("serverMessage", (data) => {
+  if (data.code == sessionStorage.getItem("connectionCode")) {
+    setResponse(data, botLoadingDelay + botReplyDelay);
+  }
+});
+
+socket.on("joinedMessage", (data) => {
+  if (data.code == sessionStorage.getItem("connectionCode")) {
+    sendNotification(data.message);
+    setResponse(data, botLoadingDelay + botReplyDelay);
+  }
+});
+
+socket.on("leftMessage", (data) => {
+  if (data.code == sessionStorage.getItem("connectionCode")) {
+    sendNotification(data.message);
+    setResponse(data, botLoadingDelay + botReplyDelay);
+  }
+});
+
+socket.on("typingChat", (data) => {
+  if (data.code == sessionStorage.getItem("connectionCode")) {
+    if (data.status && data.status != null) {
+      const response = { ...createResponse(loader), userName: data.userName };
+      aiMessage(response, true, botLoadingDelay);
+    } else {
+      removeLoader();
+    }
+  }
+});
+
+//-----------------------------------------------------
 
 //---------------- Event Listeners -------------------
 
+let timer; //fro typing status
+const waitTime = 1000; // typing wait time
+let typingStatus = true; // for typing status
+
 window.addEventListener("load", () => {
-  // const params = new URLSearchParams(window.location.search);
-  // params.set("code", sessionStorage.getItem("connectionCode"));
-  // window.history.replaceState({}, 'chat', `${window.location.pathname}?${params}`);
+  getIpAddress();
   validateUser();
 });
 
@@ -302,11 +343,31 @@ $chatbotSubmit.addEventListener(
   false
 );
 
-$closeButton.addEventListener("click", () => {
+$leaveButton.addEventListener("click", () => {
   showConfirmBox("Are you sure you want to leave the chat.", () => {
     leaveChat();
     clearSession();
   });
+});
+
+$chatbotInput.addEventListener("keyup", (event) => {
+  clearTimeout(timer);
+  if (typingStatus) {
+    socket.emit("typing", {
+      userName: sessionStorage.getItem("userName"),
+      status: true,
+      code: sessionStorage.getItem("connectionCode"),
+    });
+    typingStatus = false;
+  }
+
+  timer = setTimeout(() => {
+    socket.emit("typing", {
+      status: false,
+      code: sessionStorage.getItem("connectionCode"),
+    });
+    typingStatus = true;
+  }, waitTime);
 });
 
 //----------------------------------------------------
