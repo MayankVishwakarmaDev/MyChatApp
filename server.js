@@ -22,7 +22,6 @@ io.on("connection", (socket) => {
   console.log("a user connected : " + socket.id);
   socket.on("userMessage", (data) => {
     console.log("user IP : " + data.ip);
-    console.log("userMessage : ", data);
     socket.broadcast.emit("serverMessage", data);
   });
 
